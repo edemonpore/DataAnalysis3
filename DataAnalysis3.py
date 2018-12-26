@@ -1,52 +1,42 @@
-# DataAnalysis2
-# Latest: 12/2018
+# DataAnalysis3
+# Latest: 1/2019
 
 import os
-import sys
 import numpy as np
-import struct
 import matplotlib.pyplot as plt
-import localtools as lt
+from localtools import ElementsData
+from tkinter import *
+from tkinter import filedialog
 
-filename = lt.opendata()
-file = open(filename, 'rb')
-
-rawdata = file.read()
-datasize = sys.getsizeof(rawdata)
-rows = int(datasize/8)
-
-# struct games...
-formatstring = str(rows)+'ff' #Values are stored as floats, 2 per line
-buffersize = struct.calcsize(formatstring)
-values = struct.unpack(formatstring, rawdata[0:int(buffersize)])
-
-current1 = []
-current2 = []
-current3 = []
-current4 = []
-voltage = []
-for i in range(len(values)):
-    if i % 2 == 0:
-        current.append(values[i])
-    else:
-        voltage.append(values[i])
-if len(current)-len(voltage):
-    voltage.append(values[i-1])
-print('Rows: ', i)
+root = Tk()
+root.withdraw()
+root.update()
+filename = filedialog.askopenfilename(initialdir="C:\\Users\\User\\Desktop\\Demonpore\\Data",
+                                  title="Select Elements Header File",
+                                  filetypes=(("Elements Header", ".edh"), ("all files", "*.*")))
+root.destroy()
+ED = ElementsData(filename)
 
 # Set up parameters
-Fs = 1250.0
+Fs = ED.Sampfrq*1000
 Ts = 1.0 / Fs
-n = len(current)
+n = len(ED.current)
+print(ED.current)
 t = np.arange(0, n/Fs, Ts)
 k = np.arange(n)
 T = n/Fs
 frq = k/T
 frq = frq[range(n//2)]
 
-Y = np.fft.fft(current)/n
-Y = Y[range(n//2)]
-
+if ED.Channels > 1:
+    Y = np.zeros(ED.Channels, dtype=float)
+    for i in range(ED.Channels):
+        np.append(Y, np.fft.fft(ED.current[...,i]), axis=i)
+else:
+    Y = np.fft.fft(ED.current)/n
+    Y = Y[range(n//2)]
+print(ED.current)
+exit()
 # Isolate DC and 60 Cycle components
 DCOffset = Y[0]
 ACNoise = 0

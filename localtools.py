@@ -1,23 +1,55 @@
 #Local tools library...
 #12/2018
 
-# Tkinter file open dialog
-from tkinter import *
-from tkinter import filedialog
-def opendata():
-    root = Tk()
-    root.withdraw()
-    root.update()
-    filename = filedialog.askopenfilename(initialdir="C:\\Users\\User\\Desktop\\Demonpore\\Data",
-                                      title="Select Data File",
-                                      filetypes=(("Elements Data", "*.dat"), ("all files", "*.*")))
-    root.destroy()
-    if filename:
-        return filename
-    else:
-        print('No file to open. Exiting.')
-        exit()
+# Elements Data Class Definition
+import sys
+import struct
+import numpy as np
+class ElementsData:
+    def __init__(self, filename):
+        # Initialize Header Data
+        self.HeaderFileName = filename
+        with open(filename, 'r') as f:
+            for line in f.readlines():
+                text = line.split(": ")[0]
+                if text == "Channels":
+                    self.Channels = int(line.split(": ")[1])
+                if text == "Range":
+                    temp = line.split(": ")[1]
+                    self.Range = float(temp.split(" ")[0])
+                if text == "Sampling frequency (SR)":
+                    temp = line.split(": ")[1]
+                    self.Sampfrq = float(temp.split(" ")[0])
+                if text == "Final Bandwidth":
+                    temp = line.split("Final Bandwidth: SR/")[1]
+                    self.BandwidthDivisor = int(temp.split(" ")[0])
+                if text == "Acquisition start time":
+                    self.DAQStart = line.split(": ")[1]
+        # Initialize Raw Data
+        self.DataFileName = filename.strip('.edh') + "_000.dat"
+        with open(self.DataFileName, 'rb') as file:
+            rawdata = file.read()
+            datasize = sys.getsizeof(rawdata)
+            columns = self.Channels + 1  #Current channels + voltage
+            rows = int(datasize / (4 * columns))
 
+            # struct games...
+            formatstring = str(rows)+ (columns * 'f')  # Values packed as floats
+            #print(formatstring)
+            buffersize = struct.calcsize(formatstring)
+            #print('buffersize = ', buffersize)
+            values = struct.unpack(formatstring, rawdata[0:int(buffersize)])
+            print(values[0])
+
+            self.current = np.zeros(4, dtype=float)
+            self.voltage = []
+            for i in range(len(values)):
+                if (i + 1) % 5 == 0:
+                    np.append(self.current, [values[i - 4], values[i - 3], values[i - 2], values[i - 1]], axis=0)
+                    self.voltage.append(values[i])
+                    print(i,"  current=",self.current, "voltage=",self.voltage)
+
+            print('Rows: ', i)
 
 #Plotly plot (fails with really large data sets)
 import time
