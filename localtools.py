@@ -36,7 +36,7 @@ class ElementsData:
             rawdata = file.read()
             datasize = sys.getsizeof(rawdata)
             columns = self.Channels + 1  #Current channels + voltage
-            self.Rows = 32#int(datasize // (4 * columns))
+            self.Rows = int(datasize // (4 * columns))
             #print("Acquired data points =", self.Rows)
 
             # struct games...
@@ -64,7 +64,7 @@ class ElementsData:
                         a = np.array([values[i-4], values[i-3], values[i-2], values[i-1]])
                         np.append(self.current, a, axis=0)
                         self.voltage.append(values[i])
-                #print(i,"current=",self.current, "voltage=",self.voltage)
+                    #print(i,"current=",self.current)
             print('Rows: ', self.Rows)
 
 
