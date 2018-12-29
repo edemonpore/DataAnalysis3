@@ -14,32 +14,33 @@ class ElementsData:
                 text = line.split(": ")[0]
                 if text == "Channels":
                     self.Channels = int(line.split(": ")[1])
-                    print("Channels = ", self.Channels)
+                    print("Channels =", self.Channels)
                 if text == "Range":
                     temp = line.split(": ")[1]
                     self.Range = float(temp.split(" ")[0])
-                    print("Range = ", self.Range)
+                    print("Range =", self.Range, " nA")
                 if text == "Sampling frequency (SR)":
                     temp = line.split(": ")[1]
                     self.Sampfrq = float(temp.split(" ")[0])
-                    print("Sample Frequency = ", self.Sampfrq)
+                    print("Sample Frequency =", self.Sampfrq, " KHz")
                 if text == "Final Bandwidth":
                     temp = line.split("Final Bandwidth: SR/")[1]
                     self.BandwidthDivisor = int(temp.split(" ")[0])
-                    print("Slew Rate (SR) Divisor = ", self.BandwidthDivisor)
+                    print("Slew Rate (SR) Divisor =", self.BandwidthDivisor)
                 if text == "Acquisition start time":
                     self.DAQStart = line.split(": ")[1]
-                    print("Acquisition start: ", self.DAQStart)
+                    print("Acquisition start:", self.DAQStart)
         # Initialize Raw Data
         self.DataFileName = filename.strip('.edh') + "_000.dat"
         with open(self.DataFileName, 'rb') as file:
             rawdata = file.read()
             datasize = sys.getsizeof(rawdata)
             columns = self.Channels + 1  #Current channels + voltage
-            rows = int(datasize // (4 * columns))
+            self.Rows = 32#int(datasize // (4 * columns))
+            #print("Acquired data points =", self.Rows)
 
             # struct games...
-            formatstring = str(rows)+ (columns * 'f')  # Values packed as floats
+            formatstring = str(self.Rows)+(columns*'f')
             #print(formatstring)
             buffersize = struct.calcsize(formatstring)
             #print('buffersize = ', buffersize)
@@ -56,15 +57,17 @@ class ElementsData:
                             self.voltage.append(values[i+1])
             # 4-channel read
             elif self.Channels == 4:
-                self.current = np.empty(shape=(rows, self.Channels), dtype=float)
-                for i in range(len(values)):
-                    j = (i+1)%5
+                self.current = np.array([values[0], values[1], values[2], values[3]])
+                for i in range(1, len(values), 1):
+                    j = (i + 1) % 5
                     if j == 0:
                         a = np.array([values[i-4], values[i-3], values[i-2], values[i-1]])
-                        np.append(self.current, [a], axis=0)
+                        np.append(self.current, a, axis=0)
                         self.voltage.append(values[i])
-            #print(i,"current=",self.current, "voltage=",self.voltage)
-            print('Rows: ', rows)
+                #print(i,"current=",self.current, "voltage=",self.voltage)
+            print('Rows: ', self.Rows)
+
+
 
 #Plotly plot (fails with really large data sets)
 import time

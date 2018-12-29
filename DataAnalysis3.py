@@ -21,22 +21,20 @@ ED = ElementsData(filename)
 Fs = ED.Sampfrq*1000
 Ts = 1.0 / Fs
 n = len(ED.current)
-print(ED.current)
 t = np.arange(0, n/Fs, Ts)
 k = np.arange(n)
 T = n/Fs
 frq = k/T
 frq = frq[range(n//2)]
 
-if ED.Channels > 1:
-    Y = np.zeros(ED.Channels, dtype=float)
-    for i in range(ED.Channels):
-        np.append(Y, np.fft.fft(ED.current[...,i]), axis=i)
-else:
+if ED.Channels == 1:
     Y = np.fft.fft(ED.current)/n
     Y = Y[range(n//2)]
-print(ED.current)
-exit()
+else:
+    Y = np.array((range(n//2),4))
+    for i in range(ED.Channels):
+        np.append(ED.current, [np.fft.fft(ED.current[...,i])], axis=i)
+    exit()
 # Isolate DC and 60 Cycle components
 DCOffset = Y[0]
 ACNoise = 0
