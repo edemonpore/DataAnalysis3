@@ -14,24 +14,29 @@ class ElementsData:
                 text = line.split(": ")[0]
                 if text == "Channels":
                     self.Channels = int(line.split(": ")[1])
+                    print("Channels = ", self.Channels)
                 if text == "Range":
                     temp = line.split(": ")[1]
                     self.Range = float(temp.split(" ")[0])
+                    print("Range = ", self.Range)
                 if text == "Sampling frequency (SR)":
                     temp = line.split(": ")[1]
                     self.Sampfrq = float(temp.split(" ")[0])
+                    print("Sample Frequency = ", self.Sampfrq)
                 if text == "Final Bandwidth":
                     temp = line.split("Final Bandwidth: SR/")[1]
                     self.BandwidthDivisor = int(temp.split(" ")[0])
+                    print("Slew Rate (SR) Divisor = ", self.BandwidthDivisor)
                 if text == "Acquisition start time":
                     self.DAQStart = line.split(": ")[1]
+                    print("Acquisition start: ", self.DAQStart)
         # Initialize Raw Data
         self.DataFileName = filename.strip('.edh') + "_000.dat"
         with open(self.DataFileName, 'rb') as file:
             rawdata = file.read()
             datasize = sys.getsizeof(rawdata)
             columns = self.Channels + 1  #Current channels + voltage
-            rows = int(datasize / (4 * columns))
+            rows = int(datasize // (4 * columns))
 
             # struct games...
             formatstring = str(rows)+ (columns * 'f')  # Values packed as floats
@@ -39,17 +44,27 @@ class ElementsData:
             buffersize = struct.calcsize(formatstring)
             #print('buffersize = ', buffersize)
             values = struct.unpack(formatstring, rawdata[0:int(buffersize)])
-            print(values[0])
 
-            self.current = np.zeros(4, dtype=float)
             self.voltage = []
-            for i in range(len(values)):
-                if (i + 1) % 5 == 0:
-                    np.append(self.current, [values[i - 4], values[i - 3], values[i - 2], values[i - 1]], axis=0)
-                    self.voltage.append(values[i])
-                    print(i,"  current=",self.current, "voltage=",self.voltage)
-
-            print('Rows: ', i)
+            #Single channel read
+            if self.Channels == 1:
+                self.current = []
+                for i in range(len(values)):
+                    if i % 2 == 0:
+                        self.current.append(values[i])
+                        if values[i+1]:
+                            self.voltage.append(values[i+1])
+            # 4-channel read
+            elif self.Channels == 4:
+                self.current = np.empty(shape=(rows, self.Channels), dtype=float)
+                for i in range(len(values)):
+                    j = (i+1)%5
+                    if j == 0:
+                        a = np.array([values[i-4], values[i-3], values[i-2], values[i-1]])
+                        np.append(self.current, [a], axis=0)
+                        self.voltage.append(values[i])
+            #print(i,"current=",self.current, "voltage=",self.voltage)
+            print('Rows: ', rows)
 
 #Plotly plot (fails with really large data sets)
 import time
