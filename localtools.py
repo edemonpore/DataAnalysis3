@@ -5,11 +5,12 @@ import sys
 import struct
 import numpy as np
 
-"""Elements Data Class Definition
+"""ElementsData Class Definition
 Methods:
     __init__(self, filename)
 
 Attributes:
+    DataFileName    # Derived data file name from selected ".edh" header file name
     Channels        # 1 or 4 Depending on which Elements PCA
     Range           # PCA potential range in nA
     Sampfrq         # Sample rate in KHz
