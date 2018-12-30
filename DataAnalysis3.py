@@ -18,10 +18,10 @@ root.destroy()
 ED = ElementsData(filename)
 
 # Set up parameters
-Fs = ED.Sampfrq*1000
-Ts = 1.0 / Fs
-n = ED.Rows
-t = np.arange(0, n/Fs, Ts)
+Fs = ED.Sampfrq*1000        #Samples per second
+Ts = 1.0 / Fs               #Sample time in seconds
+n = ED.Rows                 #Number of acquired data samples
+t = np.arange(0, n/Fs, Ts)  #Metered time axis
 k = np.arange(n)
 T = n/Fs
 frq = k/T
@@ -66,11 +66,11 @@ plt.figure(1)
 plt.subplot(2,1,1)
 for i in range(ED.Channels):
     plt.plot(t, ED.current[:,i], linewidth=.05)
-plt.title(os.path.split(ED.filename)[1] + ': Raw Data')
+plt.title(os.path.split(ED.DataFileName)[1] + ': Raw Data')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
 plt.subplot(2,1,2)
-plt.plot(t, voltage, 'r', linewidth=.05)
+plt.plot(t, ED.voltage, 'r', linewidth=.05)
 plt.ylabel('Potential (mV)')
 plt.xlabel('time (s)')
 plt.grid(True, which='both', axis='both', **kwargs)

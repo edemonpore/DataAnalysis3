@@ -10,6 +10,7 @@ Methods:
     __init__(self, filename)
 
 Attributes:
+    HeaderFileName  # Header file name acquired by "open file" dialog...
     DataFileName    # Derived data file name from selected ".edh" header file name
     Channels        # 1 or 4 Depending on which Elements PCA
     Range           # PCA potential range in nA
@@ -74,11 +75,13 @@ class ElementsData:
             # 4-channel read
             elif self.Channels == 4:
                 self.current = np.empty(shape=(self.Rows,4))
-                for i in range(len(values)-20):
-                    if (i + 1) % 5 == 0:
-                        a = np.array([values[i-4], values[i-3], values[i-2], values[i-1]])
-                        self.current[i] = a
-                        self.voltage.append(values[i])
+                for i in range(self.Rows):
+                    a = np.array([values[i], values[i+1], values[i+2], values[i+3]])
+                    self.current[i] = a
+                    self.voltage.append(values[i+4])
+            else:
+                print("Unrecognized patch clamp amplifier. Exiting...")
+                exit()
 
 
 #Plotly plot (fails with really large data sets)
