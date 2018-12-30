@@ -75,10 +75,12 @@ class ElementsData:
             # 4-channel read
             elif self.Channels == 4:
                 self.current = np.empty(shape=(self.Rows,4))
+                self.voltage = np.empty(shape=(self.Rows,1))
                 for i in range(self.Rows):
                     a = np.array([values[i], values[i+1], values[i+2], values[i+3]])
                     self.current[i] = a
-                    self.voltage.append(values[i+4])
+                    self.voltage[i] = values[i+4]
+                print(self.voltage)
             else:
                 print("Unrecognized patch clamp amplifier. Exiting...")
                 exit()

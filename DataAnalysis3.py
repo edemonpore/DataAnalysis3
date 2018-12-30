@@ -57,7 +57,9 @@ print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
 print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
       " Centered at {:.2f}".format(ACFreq), "Hz")
 """
-
+print(1)
+print(ED.voltage)
+exit()
 #Matplotlib plots
 plt.style.use('dark_background')
 #Raw data
