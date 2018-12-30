@@ -27,6 +27,7 @@ T = n/Fs
 frq = k/T
 frq = frq[range(n//2)]
 
+"""
 if ED.Channels == 1:
     Y = np.fft.fft(ED.current)/n
     Y = Y[range(n//2)]
@@ -47,15 +48,15 @@ for i in range(n // 2):
             ACFreq = frq[i]
         Y[i] = 0  # Kill 60 cycle noise
     #Kill other noise sources above threshold
-"""    threshold = .03
+   threshold = .03
     if abs(Y[i]).real >= threshold:
 #       print("{:.2f}".format(frq[i]),"",abs(Y[i]).real)
        Y[i] = threshold
-"""
 
 print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
 print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
       " Centered at {:.2f}".format(ACFreq), "Hz")
+"""
 
 #Matplotlib plots
 plt.style.use('dark_background')
@@ -63,16 +64,18 @@ plt.style.use('dark_background')
 kwargs = {"color": (1,1,1), "linewidth": .3}
 plt.figure(1)
 plt.subplot(2,1,1)
-plt.plot(t, current, 'b', linewidth=.01)
-plt.title(os.path.split(filename)[1] + ': Raw Data')
+for i in range(ED.Channels):
+    plt.plot(t, ED.current[:,i], linewidth=.05)
+plt.title(os.path.split(ED.filename)[1] + ': Raw Data')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
 plt.subplot(2,1,2)
-plt.plot(t, voltage, 'r', linewidth=.01)
+plt.plot(t, voltage, 'r', linewidth=.05)
 plt.ylabel('Potential (mV)')
 plt.xlabel('time (s)')
 plt.grid(True, which='both', axis='both', **kwargs)
 
+"""
 #Plot DFT
 plt.figure(2)
 plt.plot(frq, abs(Y).real, 'g', linewidth=.3)
@@ -91,7 +94,6 @@ plt.title(os.path.split(filename)[1] + ': Inverse DFT')
 plt.xlabel('time (s)')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
+"""
 
 plt.show()
-
-#lt.goplotly()

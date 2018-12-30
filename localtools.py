@@ -30,6 +30,7 @@ class ElementsData:
                 if text == "Acquisition start time":
                     self.DAQStart = line.split(": ")[1]
                     print("Acquisition start:", self.DAQStart)
+
         # Initialize Raw Data
         self.DataFileName = filename.strip('.edh') + "_000.dat"
         with open(self.DataFileName, 'rb') as file:
@@ -37,7 +38,7 @@ class ElementsData:
             datasize = sys.getsizeof(rawdata)
             columns = self.Channels + 1  #Current channels + voltage
             self.Rows = int(datasize // (4 * columns))
-            #print("Acquired data points =", self.Rows)
+            print("Acquired data points =", self.Rows)
 
             # struct games...
             formatstring = str(self.Rows)+(columns*'f')
@@ -57,16 +58,12 @@ class ElementsData:
                             self.voltage.append(values[i+1])
             # 4-channel read
             elif self.Channels == 4:
-                self.current = np.array([values[0], values[1], values[2], values[3]])
-                for i in range(1, len(values), 1):
-                    j = (i + 1) % 5
-                    if j == 0:
+                self.current = np.empty(shape=(self.Rows,4))
+                for i in range(len(values)-20):
+                    if (i + 1) % 5 == 0:
                         a = np.array([values[i-4], values[i-3], values[i-2], values[i-1]])
-                        np.append(self.current, a, axis=0)
+                        self.current[i] = a
                         self.voltage.append(values[i])
-                    #print(i,"current=",self.current)
-            print('Rows: ', self.Rows)
-
 
 
 #Plotly plot (fails with really large data sets)
