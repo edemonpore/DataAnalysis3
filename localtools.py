@@ -1,10 +1,24 @@
 #Local tools library...
 #12/2018
 
-# Elements Data Class Definition
 import sys
 import struct
 import numpy as np
+
+"""Elements Data Class Definition
+Methods:
+    __init__(self, filename)
+
+Attributes:
+    Channels        # 1 or 4 Depending on which Elements PCA
+    Range           # PCA potential range in nA
+    Sampfrq         # Sample rate in KHz
+    BandwidthDivisor# Integer divisor to derive actual bandwidth
+    DAQStart        # Acquisition initialization mark
+    current         # Data array with current values for acquired channel(s) in nA
+    voltage         # 1D Data array with acquired potentials in mV
+    Rows            # Acquired data points, each having current(s) and voltage
+"""
 class ElementsData:
     def __init__(self, filename):
         # Initialize Header Data

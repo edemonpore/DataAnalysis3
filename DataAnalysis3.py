@@ -20,7 +20,7 @@ ED = ElementsData(filename)
 # Set up parameters
 Fs = ED.Sampfrq*1000
 Ts = 1.0 / Fs
-n = len(ED.current)
+n = ED.Rows
 t = np.arange(0, n/Fs, Ts)
 k = np.arange(n)
 T = n/Fs
