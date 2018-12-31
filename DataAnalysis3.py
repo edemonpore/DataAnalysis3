@@ -2,6 +2,7 @@
 # Latest: 1/2019
 
 import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from localtools import ElementsData
@@ -15,6 +16,8 @@ filename = filedialog.askopenfilename(initialdir="C:\\Users\\User\\Desktop\\Demo
                                   title="Select Elements Header File",
                                   filetypes=(("Elements Header", ".edh"), ("all files", "*.*")))
 root.destroy()
+start_time = time.time() # Execution timekeeping...
+
 ED = ElementsData(filename)
 
 # Set up parameters
@@ -49,10 +52,10 @@ for i in range(n // 2):
             ACFreq = frq[i]
         Y[i] = 0  # Kill 60 cycle noise
     #Kill other noise sources above threshold
-    threshold = .05
-    if abs(Y[i]).real >= threshold:
+#   threshold = .05
+#    if abs(Y[i]).real >= threshold:
 #       print("{:.2f}".format(frq[i]),"",abs(Y[i]).real)
-       Y[i] = threshold
+#       Y[i] = threshold
 
 print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
 print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
@@ -75,12 +78,11 @@ plt.ylabel('Potential (mV)')
 plt.xlabel('time (s)')
 plt.grid(True, which='both', axis='both', **kwargs)
 
-
 #Plot DFT
 plt.figure(2)
 for i in range(1): #ED.Channels):
     #plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
-    plt.plot(frq, abs(Y).real, linewidth=.1)
+    plt.plot(frq, abs(Y).real, linewidth=1)
 plt.title(os.path.split(filename)[1] + ': DFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')
@@ -88,20 +90,21 @@ plt.grid(True, which='both', axis='both', **kwargs)
 
 # #Plot inverseDFT
 icurrent = np.fft.ifft(Y, n)
+a = abs(np.mean(icurrent)).real
 plt.figure(3)
 for i in range(1): #ED.Channels):
     plt.plot(t, ED.current[:,i], linewidth=.05)
-    a = abs(np.mean(icurrent)).real
     b = abs(np.mean(ED.current[:,i])).real
+    scale = b/a
     print("mean of icurrent =", a)
     print("mean of ED.current =", b)
-    exit()
     scale = (abs(np.mean(ED.current[i])).real) / abs(np.mean(icurrent)).real
     print("Scale of FFT", i, "= ", scale)
-plt.plot(t, abs(icurrent).real*scale, 'r', linewidth=.1)
+plt.plot(t, abs(icurrent).real*scale, 'r', linewidth=.2)
 plt.title(os.path.split(filename)[1] + ': Inverse DFT')
 plt.xlabel('time (s)')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
 
 plt.show()
+print("Execution time: %s seconds" % (time.time() - start_time))
