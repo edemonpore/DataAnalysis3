@@ -51,31 +51,26 @@ class ElementsData:
 
         # Initialize Raw Data
         self.DataFileName = filename.strip('.edh') + "_000.dat"
-        with open(self.DataFileName, 'rb') as file:
+        with open(self.DataFileName, 'rb') as file: # Read in binary data
             databytes = os.path.getsize(self.DataFileName)
             print("Datasize in bytes =",databytes)
             columns = self.Channels + 1
             self.Rows = int(databytes // 4 // columns)
 
-            # struct games...
+            # Use struct to unpack binary data into Data array
             formatstring = str(columns * 'f')
             buffersize = struct.calcsize(formatstring)
-
+            #Read into python list for speed...
             test = []
-            for i in range(self.Rows): #self.Rows):
-                values = struct.unpack(formatstring, file.read(buffersize))
-                test.append(values)
+            for i in range(self.Rows):
+                test.append(struct.unpack(formatstring, file.read(buffersize)))
+            #Store as numpy array for indexing versatility...
             self.Data = np.array(test)
 
+            # Read Data from PCA (either 1 or 4-channel) into local arrays
             self.voltage = []
             self.current = np.empty(shape=(self.Rows, self.Channels), dtype=float)
-            #Single channel read
-            if self.Channels == 1:
-                self.current[:,0] = self.Data[:,0]
-                self.voltage = self.Data[:,1]
-
-            # 4-channel read
-            elif self.Channels == 4:
+            if self.Channels == 1 or self.Channels == 4:
                 for i in range(self.Channels):
                     self.current[:,i] = self.Data[:,i]
                 self.voltage = self.Data[:,self.Channels]

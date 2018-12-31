@@ -26,16 +26,20 @@ k = np.arange(n)
 T = n/Fs
 frq = k/T
 frq = frq[range(n//2)]
+Y = np.fft.fft(ED.current[:,0])/n
+Y = Y[range(n//2)]
+
 """
+# for when using more than one PCA channel...
 Y = np.empty(shape=(ED.Rows, ED.Channels), dtype=float)
 for i in range(ED.Channels):
     Y[:,i] = np.fft.fft(ED.current[:,i])/n
-    Y[:,i] = Y[range(n//2),i]
+    Y[:,i] = Y[:,i][range(n//2)]
+"""
 
 # Isolate DC and 60 Cycle components
-#DCOffset = Y[0]
-#ACNoise = 0
-
+DCOffset = Y[0]
+ACNoise = 0
 
 # General loop through data to either filter or isolate artifacts
 for i in range(n // 2):
@@ -45,7 +49,7 @@ for i in range(n // 2):
             ACFreq = frq[i]
         Y[i] = 0  # Kill 60 cycle noise
     #Kill other noise sources above threshold
-   threshold = .03
+    threshold = .05
     if abs(Y[i]).real >= threshold:
 #       print("{:.2f}".format(frq[i]),"",abs(Y[i]).real)
        Y[i] = threshold
@@ -53,8 +57,6 @@ for i in range(n // 2):
 print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
 print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
       " Centered at {:.2f}".format(ACFreq), "Hz")
-"""
-
 
 #Matplotlib plots
 plt.style.use('dark_background')
@@ -62,8 +64,8 @@ plt.style.use('dark_background')
 kwargs = {"color": (1,1,1), "linewidth": .3}
 plt.figure(1)
 plt.subplot(2,1,1)
-for i in range(ED.Channels):
-    plt.plot(t, ED.current[:,i], linewidth=.1)
+for i in range(1): #ED.Channels):
+    plt.plot(t, ED.current[:,i], linewidth=.05)
 plt.title(os.path.split(ED.DataFileName)[1] + ': Raw Data')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
@@ -73,26 +75,33 @@ plt.ylabel('Potential (mV)')
 plt.xlabel('time (s)')
 plt.grid(True, which='both', axis='both', **kwargs)
 
-"""
+
 #Plot DFT
 plt.figure(2)
-for i in range(ED.Channels):
-    plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
+for i in range(1): #ED.Channels):
+    #plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
+    plt.plot(frq, abs(Y).real, linewidth=.1)
 plt.title(os.path.split(filename)[1] + ': DFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')
 plt.grid(True, which='both', axis='both', **kwargs)
 
-# Set up inverse DFT
+# #Plot inverseDFT
 icurrent = np.fft.ifft(Y, n)
-
-#Plot inverseDFT
 plt.figure(3)
-plt.plot(t, abs(icurrent).real, 'c', linewidth=.01)
+for i in range(1): #ED.Channels):
+    plt.plot(t, ED.current[:,i], linewidth=.05)
+    a = abs(np.mean(icurrent)).real
+    b = abs(np.mean(ED.current[:,i])).real
+    print("mean of icurrent =", a)
+    print("mean of ED.current =", b)
+    exit()
+    scale = (abs(np.mean(ED.current[i])).real) / abs(np.mean(icurrent)).real
+    print("Scale of FFT", i, "= ", scale)
+plt.plot(t, abs(icurrent).real*scale, 'r', linewidth=.1)
 plt.title(os.path.split(filename)[1] + ': Inverse DFT')
 plt.xlabel('time (s)')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
-"""
 
 plt.show()
