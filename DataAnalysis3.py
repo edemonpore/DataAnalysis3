@@ -105,6 +105,5 @@ plt.title(os.path.split(filename)[1] + ': Inverse DFT')
 plt.xlabel('time (s)')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
-
-plt.show()
 print("Execution time: %s seconds" % (time.time() - start_time))
+plt.show()

@@ -50,7 +50,7 @@ class ElementsData:
                     print("Acquisition start:", self.DAQStart)
 
         # Initialize Raw Data
-        self.DataFileName = filename.strip('.edh') + "_000.dat"
+        self.DataFileName = filename.split(".edh")[0] + "_000.dat"
         with open(self.DataFileName, 'rb') as file: # Read in binary data
             databytes = os.path.getsize(self.DataFileName)
             print("Datasize in bytes =",databytes)
