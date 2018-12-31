@@ -26,19 +26,16 @@ k = np.arange(n)
 T = n/Fs
 frq = k/T
 frq = frq[range(n//2)]
-
 """
-if ED.Channels == 1:
-    Y = np.fft.fft(ED.current)/n
-    Y = Y[range(n//2)]
-else:
-    Y = np.array((range(n//2), 4))
-    for i in range(ED.Channels):
-        np.append(Y[i], np.fft.fft(ED.current[...,i]), axis=i)
-    exit()
+Y = np.empty(shape=(ED.Rows, ED.Channels), dtype=float)
+for i in range(ED.Channels):
+    Y[:,i] = np.fft.fft(ED.current[:,i])/n
+    Y[:,i] = Y[range(n//2),i]
+
 # Isolate DC and 60 Cycle components
-DCOffset = Y[0]
-ACNoise = 0
+#DCOffset = Y[0]
+#ACNoise = 0
+
 
 # General loop through data to either filter or isolate artifacts
 for i in range(n // 2):
@@ -57,9 +54,8 @@ print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
 print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
       " Centered at {:.2f}".format(ACFreq), "Hz")
 """
-print(1)
-print(ED.voltage)
-exit()
+
+
 #Matplotlib plots
 plt.style.use('dark_background')
 #Raw data
@@ -67,12 +63,12 @@ kwargs = {"color": (1,1,1), "linewidth": .3}
 plt.figure(1)
 plt.subplot(2,1,1)
 for i in range(ED.Channels):
-    plt.plot(t, ED.current[:,i], linewidth=.05)
+    plt.plot(t, ED.current[:,i], linewidth=.1)
 plt.title(os.path.split(ED.DataFileName)[1] + ': Raw Data')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
 plt.subplot(2,1,2)
-plt.plot(t, ED.voltage, 'r', linewidth=.05)
+plt.plot(t, ED.voltage, 'r', linewidth=.5)
 plt.ylabel('Potential (mV)')
 plt.xlabel('time (s)')
 plt.grid(True, which='both', axis='both', **kwargs)
@@ -80,7 +76,8 @@ plt.grid(True, which='both', axis='both', **kwargs)
 """
 #Plot DFT
 plt.figure(2)
-plt.plot(frq, abs(Y).real, 'g', linewidth=.3)
+for i in range(ED.Channels):
+    plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
 plt.title(os.path.split(filename)[1] + ': DFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')

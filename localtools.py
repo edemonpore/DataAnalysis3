@@ -1,6 +1,7 @@
 #Local tools library...
 #12/2018
 
+import os
 import sys
 import struct
 import numpy as np
@@ -17,6 +18,7 @@ Attributes:
     Sampfrq         # Sample rate in KHz
     BandwidthDivisor# Integer divisor to derive actual bandwidth
     DAQStart        # Acquisition initialization mark
+    Data            # Single multi-dimensional array
     current         # Data array with current values for acquired channel(s) in nA
     voltage         # 1D Data array with acquired potentials in mV
     Rows            # Acquired data points, each having current(s) and voltage
@@ -50,37 +52,33 @@ class ElementsData:
         # Initialize Raw Data
         self.DataFileName = filename.strip('.edh') + "_000.dat"
         with open(self.DataFileName, 'rb') as file:
-            rawdata = file.read()
-            datasize = sys.getsizeof(rawdata)
-            columns = self.Channels + 1  #Current channels + voltage
-            self.Rows = int(datasize // (4 * columns))
-            print("Acquired data points =", self.Rows)
+            databytes = os.path.getsize(self.DataFileName)
+            print("Datasize in bytes =",databytes)
+            columns = self.Channels + 1
+            self.Rows = int(databytes // 4 // columns)
 
             # struct games...
-            formatstring = str(self.Rows)+(columns*'f')
-            #print(formatstring)
+            formatstring = str(columns * 'f')
             buffersize = struct.calcsize(formatstring)
-            #print('buffersize = ', buffersize)
-            values = struct.unpack(formatstring, rawdata[0:int(buffersize)])
+
+            test = []
+            for i in range(self.Rows): #self.Rows):
+                values = struct.unpack(formatstring, file.read(buffersize))
+                test.append(values)
+            self.Data = np.array(test)
 
             self.voltage = []
+            self.current = np.empty(shape=(self.Rows, self.Channels), dtype=float)
             #Single channel read
             if self.Channels == 1:
-                self.current = []
-                for i in range(len(values)):
-                    if i % 2 == 0:
-                        self.current.append(values[i])
-                        if values[i+1]:
-                            self.voltage.append(values[i+1])
+                self.current[:,0] = self.Data[:,0]
+                self.voltage = self.Data[:,1]
+
             # 4-channel read
             elif self.Channels == 4:
-                self.current = np.empty(shape=(self.Rows,4))
-                self.voltage = np.empty(shape=(self.Rows,1))
-                for i in range(self.Rows):
-                    a = np.array([values[i], values[i+1], values[i+2], values[i+3]])
-                    self.current[i] = a
-                    self.voltage[i] = values[i+4]
-                print(self.voltage)
+                for i in range(self.Channels):
+                    self.current[:,i] = self.Data[:,i]
+                self.voltage = self.Data[:,self.Channels]
             else:
                 print("Unrecognized patch clamp amplifier. Exiting...")
                 exit()
