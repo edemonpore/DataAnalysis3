@@ -46,11 +46,11 @@ ACNoise = 0
 
 # General loop through data to either filter or isolate artifacts
 for i in range(n // 2):
-    if (frq[i] >= 58 and frq[i] <= 65):
+    if (frq[i] >= 58 and frq[i] <= 63):
         if abs(Y[i]) >= ACNoise:
             ACNoise = abs(Y[i])
             ACFreq = frq[i]
-        Y[i] = 0  # Kill 60 cycle noise
+            Y[i] = 0  # Kill 60 cycle noise
     #Kill other noise sources above threshold
 #   threshold = .05
 #    if abs(Y[i]).real >= threshold:
@@ -82,7 +82,7 @@ plt.grid(True, which='both', axis='both', **kwargs)
 plt.figure(2)
 for i in range(1): #ED.Channels):
     #plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
-    plt.plot(frq, abs(Y).real, linewidth=1)
+    plt.plot(frq, abs(Y).real, 'y', linewidth=1)
 plt.title(os.path.split(filename)[1] + ': DFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')
@@ -93,17 +93,22 @@ icurrent = np.fft.ifft(Y, n)
 a = abs(np.mean(icurrent)).real
 plt.figure(3)
 for i in range(1): #ED.Channels):
-    plt.plot(t, ED.current[:,i], linewidth=.05)
+    plt.plot(t, ED.current[:,i], 'c', linewidth=.03, label="Raw Data")
     b = abs(np.mean(ED.current[:,i])).real
     scale = b/a
     print("mean of icurrent =", a)
     print("mean of ED.current =", b)
-    scale = (abs(np.mean(ED.current[i])).real) / abs(np.mean(icurrent)).real
+    scale = np.mean(ED.current[:,i].real) / np.mean(icurrent.real)
     print("Scale of FFT", i, "= ", scale)
-plt.plot(t, abs(icurrent).real*scale, 'r', linewidth=.2)
+plt.plot(t, abs(icurrent).real*scale, 'g', linewidth=.2, label="Filtered Data")
 plt.title(os.path.split(filename)[1] + ': Inverse DFT')
+legend = plt.legend()
+for legobj in legend.legendHandles:
+    legobj.set_linewidth(2.0)
 plt.xlabel('time (s)')
 plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
+
 print("Execution time: %s seconds" % (time.time() - start_time))
+
 plt.show()
