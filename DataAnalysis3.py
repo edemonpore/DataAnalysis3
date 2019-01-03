@@ -83,7 +83,7 @@ plt.figure(2)
 for i in range(1): #ED.Channels):
     #plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
     plt.plot(frq, abs(Y).real, 'y', linewidth=1)
-plt.title(os.path.split(filename)[1] + ': DFT')
+plt.title(os.path.split(ED.DataFileName)[1] + ': DFT')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Amplitude')
 plt.grid(True, which='both', axis='both', **kwargs)
@@ -101,7 +101,7 @@ for i in range(1): #ED.Channels):
     scale = np.mean(ED.current[:,i].real) / np.mean(icurrent.real)
     print("Scale of FFT", i, "= ", scale)
 plt.plot(t, abs(icurrent).real*scale, 'g', linewidth=.2, label="Filtered Data")
-plt.title(os.path.split(filename)[1] + ': Inverse DFT')
+plt.title(os.path.split(ED.DataFileName)[1] + ': Inverse DFT')
 legend = plt.legend()
 for legobj in legend.legendHandles:
     legobj.set_linewidth(2.0)
