@@ -46,6 +46,7 @@ DCOffset = Y[0]
 ACNoise = 0
 
 # General loop through data to either filter or isolate artifacts
+threshold = .5
 for i in range(n // 2):
     if (frq[i] >= 58 and frq[i] <= 62):
         if abs(Y[i]) >= ACNoise:
@@ -53,10 +54,8 @@ for i in range(n // 2):
             ACFreq = frq[i]
             Y[i] = 0  # Kill 60 cycle noise
     #Kill other noise sources above threshold
-#   threshold = .05
-#    if abs(Y[i]).real >= threshold:
-#       print("{:.2f}".format(frq[i]),"",abs(Y[i]).real)
-#       Y[i] = threshold
+    if abs(Y[i]).real >= threshold:
+        Y[i] = threshold
 
 print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
 print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
