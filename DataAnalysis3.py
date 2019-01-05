@@ -29,6 +29,7 @@ k = np.arange(n)
 T = n/Fs
 frq = k/T
 frq = frq[range(n//2)]
+
 Y = np.fft.fft(ED.current[:,0])/n
 Y = Y[range(n//2)]
 
@@ -46,7 +47,7 @@ ACNoise = 0
 
 # General loop through data to either filter or isolate artifacts
 for i in range(n // 2):
-    if (frq[i] >= 58 and frq[i] <= 63):
+    if (frq[i] >= 58 and frq[i] <= 62):
         if abs(Y[i]) >= ACNoise:
             ACNoise = abs(Y[i])
             ACFreq = frq[i]
@@ -110,5 +111,4 @@ plt.ylabel('Current (nA)')
 plt.grid(True, which='both', axis='both', **kwargs)
 
 print("Execution time: %s seconds" % (time.time() - start_time))
-
 plt.show()

@@ -49,12 +49,22 @@ class ElementsData:
                     self.DAQStart = line.split(": ")[1]
                     print("Acquisition start:", self.DAQStart)
 
-        # Initialize Raw Data
-        databytes = 0
-        self.DataFileName = filename.split(".edh")[0] + "_000.dat"
-        with open(self.DataFileName, 'rb') as file: # Read binary
-            databytes += os.path.getsize(self.DataFileName)
+        # Concatenate binary data files into full data file
+        count = 0
+        self.DataFileName = filename.split(".edh")[0] + "_FUll.dat"
+        fin = filename.split(".edh")[0] + "_000.dat"
+        if os.path.isfile(fin) and os.path.isfile(self.DataFileName):
+            os.remove(self.DataFileName)
+        with open(self.DataFileName, 'ab') as outfile:
+            while (os.path.isfile(fin)):
+                with open(fin, 'rb') as infile:  # Read binary
+                    outfile.write(infile.read())
+                count += 1
+                fin = filename.split(".edh")[0] + "_" + str('{:03d}'.format(int(count))) + ".dat"
 
+        # Initialize Raw Data
+        with open(self.DataFileName, 'rb') as file: # Read binary
+            databytes = os.path.getsize(self.DataFileName)
             print("Datasize in bytes =",databytes)
             columns = self.Channels + 1
             self.Rows = int(databytes // 4 // columns)
