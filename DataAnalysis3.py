@@ -57,9 +57,9 @@ class DAApp(QtWidgets.QMainWindow):
         self.start_time = time.time()
 
         # Set up parameters
-        Fs = self.ED.Sampfrq*1000        #Samples per second
+        Fs = self.ED.Sampfrq*1000   #Samples per second
         Ts = 1.0 / Fs               #Sample time in seconds
-        n = self.ED.Rows                 #Number of acquired data samples
+        n = self.ED.Rows            #Number of acquired data samples
         t = np.arange(0, n/Fs, Ts)  #Metered time axis
         k = np.arange(n)
         T = n/Fs
@@ -97,7 +97,7 @@ class DAApp(QtWidgets.QMainWindow):
         print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
               " Centered at {:.2f}".format(ACFreq), "Hz")
 
-        self.rawdata.plot(t, self.ED.current[:,i], linewidth=.05, pen='b')
+        self.rawdata.plot(t[2:][:-2], self.ED.current[2:][:-2], linewidth=.05, pen='b')
 
         if str(os.path.splitext(self.datafilename)[1]) != '.abf':
             self.p1.addLine(y=self.baseline, pen='g')
