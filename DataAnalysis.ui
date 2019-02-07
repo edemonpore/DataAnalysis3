@@ -6,64 +6,58 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1189</width>
-    <height>1162</height>
+    <width>1420</width>
+    <height>1274</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>DataAnalysis3</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>60</y>
-      <width>1151</width>
-      <height>991</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="GraphicsLayoutWidget" name="RawData"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Raw Data</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="GraphicsLayoutWidget" name="DFT"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>DFT</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="GraphicsLayoutWidget" name="FilteredData"/>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Filtered Data</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="GraphicsLayoutWidget" name="RawData"/>
+      </item>
+      <item row="1" column="0" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="lRawData">
+        <property name="text">
+         <string>Raw Data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="GraphicsLayoutWidget" name="DFT"/>
+      </item>
+      <item row="3" column="0" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="lDFT">
+        <property name="text">
+         <string>DFT</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="GraphicsLayoutWidget" name="FilteredData"/>
+      </item>
+      <item row="5" column="0" alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="lFilteredData">
+        <property name="text">
+         <string>Filtered Data</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1189</width>
-     <height>26</height>
+     <width>1420</width>
+     <height>38</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

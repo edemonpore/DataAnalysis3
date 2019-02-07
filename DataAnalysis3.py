@@ -1,11 +1,14 @@
-# DataAnalysis3
-# Latest: 1/2019
+"""DataAnalysis3
+Plots raw data, DFT and filtered result
+EYafuso
+Latest: 2/2019
+"""
 
 import os
 import sys
 import time
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from localtools import ElementsData
 from PyQt5 import QtWidgets, uic
 
@@ -22,24 +25,10 @@ class DAApp(QtWidgets.QMainWindow):
         self.ui.actionExit.triggered.connect(self.close)
 
         # Set up plotting widgets
-        self.ui.RawData.setBackground('w')
         self.rawdata = self.ui.RawData.addPlot()
-        self.rawdata.setLabel('bottom', text='Time', units='s')
-        self.rawdata.setLabel('left', text='Current', units='nA')
-        self.rawdata.enableAutoRange(axis='x')
-        self.rawdata.setDownsampling(ds=True, auto=True, mode='peak')
-        self.ui.DFT.setBackground('w')
         self.dft = self.ui.DFT.addPlot()
-        self.dft.setLabel('bottom', text='Frequency', units='Hz')
-        self.dft.setLabel('left', text='Amplitude', units='')
-        self.dft.enableAutoRange(axis='x')
-        self.dft.setDownsampling(ds=True, auto=True, mode='peak')
-        self.ui.FilteredData.setBackground('w')
         self.filtereddata = self.ui.FilteredData.addPlot()
-        self.filtereddata.setLabel('bottom', text='Time', units='s')
-        self.filtereddata.setLabel('left', text='Current', units='nA')
-        self.filtereddata.enableAutoRange(axis='x')
-        self.filtereddata.setDownsampling(ds=True, auto=True, mode='peak')
+
 
     #Open File Dialog
     def FileDialog(self):
@@ -49,6 +38,7 @@ class DAApp(QtWidgets.QMainWindow):
                                                "Elements Header Files (*.edh)")[0]
         self.ED = ElementsData(self.filename)
         if self.ED:
+            self.setWindowTitle(os.path.split(self.ED.DataFileName)[1])
             self.Plot()
 
     def Plot(self):
@@ -97,61 +87,44 @@ class DAApp(QtWidgets.QMainWindow):
         print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
               " Centered at {:.2f}".format(ACFreq), "Hz")
 
-        self.rawdata.plot(t[2:][:-2], self.ED.current[2:][:-2], linewidth=.05, pen='b')
+        #self.rawdata.plot(t[2:][:-2], self.ED.current[2:][:-2], linewidth=.05, pen='b')
 
-        if str(os.path.splitext(self.datafilename)[1]) != '.abf':
-            self.p1.addLine(y=self.baseline, pen='g')
+        #PyQtGraph plots
 
-        #Matplotlib plots
-        plt.style.use('dark_background')
-        #Raw data
-        kwargs = {"color": (1,1,1), "linewidth": .3}
-        plt.figure(1)
-        plt.subplot(2,1,1)
+        #Raw Data and Set Potential
         for i in range(1): #ED.Channels):
-            plt.plot(t, self.ED.current[:,i], linewidth=.05)
-        plt.title(os.path.split(self.ED.DataFileName)[1] + ': Raw Data')
-        plt.ylabel('Current (nA)')
-        plt.grid(True, which='both', axis='both', **kwargs)
-        plt.subplot(2,1,2)
-        plt.plot(t, self.ED.voltage, 'r', linewidth=.5)
-        plt.ylabel('Potential (mV)')
-        plt.xlabel('time (s)')
-        plt.grid(True, which='both', axis='both', **kwargs)
+            self.rawdata.plot(t, self.ED.current[:,i], pen='c', linewidth=.05)
+        self.rawdata.plot(t, self.ED.voltage, pen='r', linewidth=.5, name='Potential (mV)')
+        self.rawdata.showGrid(x=True, y=True, alpha=.8)
+        self.rawdata.addLegend()
+        self.rawdata.setLabel('left', 'Current', 'nA')
+        self.rawdata.setLabel('bottom', 'Time (s)')
 
         #Plot DFT
-        plt.figure(2)
-        for i in range(1): #ED.Channels):
-            #plt.plot(frq, abs(Y[:,i]).real, linewidth=.3)
-            plt.plot(frq, abs(Y).real, 'y', linewidth=1)
-        plt.title(os.path.split(self.ED.DataFileName)[1] + ': DFT')
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('Amplitude')
-        plt.grid(True, which='both', axis='both', **kwargs)
+        self.dft.plot(frq, abs(Y).real, pen='y', linewidth=1)
+        self.dft.showGrid(x=True, y=True, alpha=.8)
+        self.dft.setLabel('left', 'Amplitude')
+        self.dft.setLabel('bottom', 'Frequency (Hz)')
 
-        # #Plot inverseDFT
+        #Plot inverseDFT
         icurrent = np.fft.ifft(Y, n)
         a = abs(np.mean(icurrent)).real
-        plt.figure(3)
+
         for i in range(1): #ED.Channels):
-            plt.plot(t, self.ED.current[:,i], 'c', linewidth=.2, label="Raw Data")
+            self.filtereddata.plot(t, self.ED.current[:,i], pen='c', linewidth=.2, name="Raw Data")
             b = abs(np.mean(self.ED.current[:,i])).real
             scale = b/a
             print("mean of icurrent =", a)
             print("mean of ED.current =", b)
             scale = np.mean(self.ED.current[:,i].real) / np.mean(icurrent.real)
             print("Scale of FFT", i, "= ", scale)
-        plt.plot(t, abs(icurrent).real*scale, 'g', linewidth=.2, label="Filtered Data")
-        plt.title(os.path.split(self.ED.DataFileName)[1] + ': Inverse DFT')
-        legend = plt.legend()
-        for legobj in legend.legendHandles:
-            legobj.set_linewidth(2.0)
-        plt.xlabel('time (s)')
-        plt.ylabel('Current (nA)')
-        plt.grid(True, which='both', axis='both', **kwargs)
+        self.filtereddata.plot(t, abs(icurrent).real*scale, pen='g', linewidth=.2, name="Filtered Data")
+        self.filtereddata.showGrid(x=True, y=True, alpha=.8)
+        self.filtereddata.setLabel('left', 'Current', 'nA')
+        self.filtereddata.setLabel('bottom', 'Time (s)')
 
         print("Execution time: %s seconds" % (time.time() - self.start_time))
-        plt.show()
+        self.rawdata.show()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
