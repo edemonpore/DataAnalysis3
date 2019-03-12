@@ -73,6 +73,8 @@ class ElementsData:
             print("Datasize in bytes =",databytes)
             columns = self.Channels + 1
             self.Rows = int(databytes // 4 // columns)
+            print("Channels =", self.Channels)
+            print("Rows =", self.Rows)
 
             # Use struct to unpack binary data into Data array
             formatstring = str(columns * 'f')
