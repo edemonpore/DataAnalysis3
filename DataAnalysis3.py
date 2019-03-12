@@ -8,15 +8,14 @@ import os
 import sys
 import time
 import numpy as np
-#import matplotlib.pyplot as plt
+import pyqtgraph
 from localtools import ElementsData
 from PyQt5 import QtWidgets, uic
-
-Ui_DA = uic.loadUiType("DataAnalysis.ui")[0]
 
 class DAApp(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
+        Ui_DA = uic.loadUiType("DataAnalysis.ui")[0]
         self.ui = Ui_DA()
         self.ui.setupUi(self)
 
@@ -28,6 +27,7 @@ class DAApp(QtWidgets.QMainWindow):
         self.rawdata = self.ui.RawData.addPlot()
         self.dft = self.ui.DFT.addPlot()
         self.filtereddata = self.ui.FilteredData.addPlot()
+        self.show()
 
 
     #Open File Dialog
@@ -92,11 +92,11 @@ class DAApp(QtWidgets.QMainWindow):
         #PyQtGraph plots
 
         #Raw Data and Set Potential
+        self.rawdata.addLegend()
         for i in range(1): #ED.Channels):
             self.rawdata.plot(t, self.ED.current[:,i], pen='c', linewidth=.05)
         self.rawdata.plot(t, self.ED.voltage, pen='r', linewidth=.5, name='Potential (mV)')
         self.rawdata.showGrid(x=True, y=True, alpha=.8)
-        self.rawdata.addLegend()
         self.rawdata.setLabel('left', 'Current', 'nA')
         self.rawdata.setLabel('bottom', 'Time (s)')
 
@@ -109,7 +109,7 @@ class DAApp(QtWidgets.QMainWindow):
         #Plot inverseDFT
         icurrent = np.fft.ifft(Y, n)
         a = abs(np.mean(icurrent)).real
-
+        self.filtereddata.addLegend()
         for i in range(1): #ED.Channels):
             self.filtereddata.plot(t, self.ED.current[:,i], pen='c', linewidth=.2, name="Raw Data")
             b = abs(np.mean(self.ED.current[:,i])).real
@@ -129,5 +129,4 @@ class DAApp(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = DAApp()
-    window.show()
     sys.exit(app.exec_())
