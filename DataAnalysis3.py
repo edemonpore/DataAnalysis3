@@ -22,6 +22,8 @@ class DAApp(QtWidgets.QMainWindow):
         # Signals to slots
         self.ui.actionOpen.triggered.connect(self.FileDialog)
         self.ui.actionExit.triggered.connect(self.close)
+        self.ui.pbPrevious.clicked.connect(lambda: self.nextData(-1))
+        self.ui.pbNext.clicked.connect(lambda: self.nextData(1))
 
         # Set up plotting widgets
         self.rawdata = self.ui.RawData.addPlot()
@@ -29,6 +31,12 @@ class DAApp(QtWidgets.QMainWindow):
         self.filtereddata = self.ui.FilteredData.addPlot()
         self.show()
 
+    def nextData(self, n):
+        self.ED.index += n
+        print("index =",self.ED.index)
+        print("max =", self.ED.maxindex)
+        self.ED.OpenDataFile()
+        self.Plot()
 
     #Open File Dialog
     def FileDialog(self):
@@ -42,6 +50,10 @@ class DAApp(QtWidgets.QMainWindow):
             self.Plot()
 
     def Plot(self):
+        #Clear plots
+        self.rawdata.clear()
+        self.dft.clear()
+        self.filtereddata.clear()
 
         # Execution timekeeping...
         self.start_time = time.time()
@@ -70,6 +82,7 @@ class DAApp(QtWidgets.QMainWindow):
         # Isolate DC and 60 Cycle components
         DCOffset = Y[0]
         ACNoise = 0
+        ACFreq = 0
 
         # General loop through data to either filter or isolate artifacts
         threshold = .5
@@ -94,7 +107,7 @@ class DAApp(QtWidgets.QMainWindow):
         #Raw Data and Set Potential
         self.rawdata.addLegend()
         for i in range(1): #ED.Channels):
-            self.rawdata.plot(t, self.ED.current[:,i], pen='c', linewidth=.05)
+            self.rawdata.plot(t, self.ED.current[:,i], pen='c', linewidth=.05, name='Current')
         self.rawdata.plot(t, self.ED.voltage, pen='r', linewidth=.5, name='Potential (mV)')
         self.rawdata.showGrid(x=True, y=True, alpha=.8)
         self.rawdata.setLabel('left', 'Current', 'nA')

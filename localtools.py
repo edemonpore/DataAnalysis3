@@ -49,22 +49,26 @@ class ElementsData:
                     self.DAQStart = line.split(": ")[1]
                     print("Acquisition start:", self.DAQStart)
 
-        # Concatenate binary data files into full data file
-        count = 0
-        self.DataFileName = filename.split(".edh")[0] + "_FUll.dat"
-        fin = filename.split(".edh")[0] + "_000.dat"
-        if os.path.isfile(fin) and os.path.isfile(self.DataFileName):
-            os.remove(self.DataFileName)
-        with open(self.DataFileName, 'ab') as outfile:
-            while (os.path.isfile(fin)):
-                with open(fin, 'rb') as infile:  # Read binary
-                    outfile.write(infile.read())
-                break
-               # count += 1
-               # fin = filename.split(".edh")[0] + "_" + str('{:03d}'.format(int(count))) + ".dat"
+        self.DataFileName = filename
+        self.maxindex = 0
+        temp = self.DataFileName.split(".edh")[0] + "_" + str('{:03d}'.format(int(self.maxindex+1))) + ".dat"
+        while os.path.isfile(temp):
+            self.maxindex += 1
+            temp = self.DataFileName.split(".edh")[0] + "_" + str('{:03d}'.format(int(self.maxindex+1))) + ".dat"
+        self.index = 0
+        self.OpenDataFile()
 
-        # Initialize Raw Data
-        with open(self.DataFileName, 'rb') as file: # Read binary
+
+    # Initialize Raw Data
+    def OpenDataFile(self):
+        if self.index < 0:
+            self.index = 0
+        if self.index > self.maxindex:
+            self.index = self.maxindex
+        fin = self.DataFileName.split(".edh")[0] + "_" + str('{:03d}'.format(int(self.index))) + ".dat"
+        if not os.path.isfile(fin):
+            self.index = self.index - 1
+        with open(fin, 'rb') as file: # Read binary
             databytes = os.path.getsize(self.DataFileName)
             print("Datasize in bytes =",databytes)
             columns = self.Channels + 1
@@ -90,3 +94,16 @@ class ElementsData:
             else:
                 print("Unrecognized patch clamp amplifier. Exiting...")
                 exit()
+
+    def Concatenate(self):   # Concatenate binary data files into full data file
+        count = 0
+        OutFileName = self.DataFilename.split(".edh")[0] + "_FUll.dat"
+        fin = filename.split(".edh")[0] + "_000.dat"
+        if os.path.isfile(fin) and os.path.isfile(OutFileName):
+            os.remove(OutFileName)
+        with open(OutFileName, 'ab') as outfile:
+            while (os.path.isfile(fin)):
+                with open(fin, 'rb') as infile:  # Read binary
+                    outfile.write(infile.read())
+                count += 1
+                fin = filename.split(".edh")[0] + "_" + str('{:03d}'.format(int(count))) + ".dat"
