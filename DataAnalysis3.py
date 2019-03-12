@@ -59,17 +59,17 @@ class DAApp(QtWidgets.QMainWindow):
         self.start_time = time.time()
 
         # Set up parameters
-        Fs = self.ED.Sampfrq*1000   #Samples per second
-        Ts = 1.0 / Fs               #Sample time in seconds
-        n = self.ED.Rows            #Number of acquired data samples
-        t = np.arange(0, n/Fs, Ts)  #Metered time axis
-        k = np.arange(n)
-        T = n/Fs
-        frq = k/T
-        frq = frq[range(n//2)]
+        # Fs = self.ED.Sampfrq*1000   #Samples per second
+        # Ts = 1.0 / Fs               #Sample time in seconds
+        # n = self.ED.Rows            #Number of acquired data samples
+        # t = np.arange(0, n/Fs, Ts)  #Metered time axis
+        # k = np.arange(n)
+        # T = n/Fs
+        # frq = k/T
+        # frq = frq[range(n//2)]
 
-        Y = np.fft.fft(self.ED.current[:,0])/n
-        Y = Y[range(n//2)]
+        # Y = np.fft.fft(self.ED.current[:,0])/n
+        # Y = Y[range(n//2)]
 
         """
         # for when using more than one PCA channel...
@@ -80,27 +80,25 @@ class DAApp(QtWidgets.QMainWindow):
         """
 
         # Isolate DC and 60 Cycle components
-        DCOffset = Y[0]
-        ACNoise = 0
-        ACFreq = 0
-
-        # General loop through data to either filter or isolate artifacts
-        threshold = .5
-        for i in range(n // 2):
-            if (frq[i] >= 58 and frq[i] <= 62):
-                if abs(Y[i]) >= ACNoise:
-                    ACNoise = abs(Y[i])
-                    ACFreq = frq[i]
-                    Y[i] = 0  # Kill 60 cycle noise
-            #Kill other noise sources above threshold
-            if abs(Y[i]).real >= threshold:
-                Y[i] = threshold
-
-        print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
-        print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
-              " Centered at {:.2f}".format(ACFreq), "Hz")
-
-        #self.rawdata.plot(t[2:][:-2], self.ED.current[2:][:-2], linewidth=.05, pen='b')
+        # DCOffset = Y[0]
+        # ACNoise = 0
+        # ACFreq = 0
+        #
+        # # General loop through data to either filter or isolate artifacts
+        # threshold = .5
+        # for i in range(n // 2):
+        #     if (frq[i] >= 58 and frq[i] <= 62):
+        #         if abs(Y[i]) >= ACNoise:
+        #             ACNoise = abs(Y[i])
+        #             ACFreq = frq[i]
+        #             Y[i] = 0  # Kill 60 cycle noise
+        #     #Kill other noise sources above threshold
+        #     if abs(Y[i]).real >= threshold:
+        #         Y[i] = threshold
+        #
+        # print("\nDC Offset = {:.2f}".format(DCOffset.real), "nA")
+        # print("60 Hz noise amplitude = {:.4f}".format(ACNoise.real),
+        #       " Centered at {:.2f}".format(ACFreq), "Hz")
 
         #PyQtGraph plots
 
@@ -113,28 +111,28 @@ class DAApp(QtWidgets.QMainWindow):
         self.rawdata.setLabel('left', 'Current', 'nA')
         self.rawdata.setLabel('bottom', 'Time (s)')
 
-        #Plot DFT
-        self.dft.plot(frq, abs(Y).real, pen='y', linewidth=1)
-        self.dft.showGrid(x=True, y=True, alpha=.8)
-        self.dft.setLabel('left', 'Amplitude')
-        self.dft.setLabel('bottom', 'Frequency (Hz)')
-
-        #Plot inverseDFT
-        icurrent = np.fft.ifft(Y, n)
-        a = abs(np.mean(icurrent)).real
-        self.filtereddata.addLegend()
-        for i in range(1): #ED.Channels):
-            self.filtereddata.plot(t, self.ED.current[:,i], pen='c', linewidth=.2, name="Raw Data")
-            b = abs(np.mean(self.ED.current[:,i])).real
-            scale = b/a
-            print("mean of icurrent =", a)
-            print("mean of ED.current =", b)
-            scale = np.mean(self.ED.current[:,i].real) / np.mean(icurrent.real)
-            print("Scale of FFT", i, "= ", scale)
-        self.filtereddata.plot(t, abs(icurrent).real*scale, pen='g', linewidth=.2, name="Filtered Data")
-        self.filtereddata.showGrid(x=True, y=True, alpha=.8)
-        self.filtereddata.setLabel('left', 'Current', 'nA')
-        self.filtereddata.setLabel('bottom', 'Time (s)')
+        # #Plot DFT
+        # self.dft.plot(frq, abs(Y).real, pen='y', linewidth=1)
+        # self.dft.showGrid(x=True, y=True, alpha=.8)
+        # self.dft.setLabel('left', 'Amplitude')
+        # self.dft.setLabel('bottom', 'Frequency (Hz)')
+        #
+        # #Plot inverseDFT
+        # icurrent = np.fft.ifft(Y, n)
+        # a = abs(np.mean(icurrent)).real
+        # self.filtereddata.addLegend()
+        # for i in range(1): #ED.Channels):
+        #     self.filtereddata.plot(t, self.ED.current[:,i], pen='c', linewidth=.2, name="Raw Data")
+        #     b = abs(np.mean(self.ED.current[:,i])).real
+        #     scale = b/a
+        #     print("mean of icurrent =", a)
+        #     print("mean of ED.current =", b)
+        #     scale = np.mean(self.ED.current[:,i].real) / np.mean(icurrent.real)
+        #     print("Scale of FFT", i, "= ", scale)
+        # self.filtereddata.plot(t, abs(icurrent).real*scale, pen='g', linewidth=.2, name="Filtered Data")
+        # self.filtereddata.showGrid(x=True, y=True, alpha=.8)
+        # self.filtereddata.setLabel('left', 'Current', 'nA')
+        # self.filtereddata.setLabel('bottom', 'Time (s)')
 
         print("Execution time: %s seconds" % (time.time() - self.start_time))
         self.rawdata.show()

@@ -69,12 +69,10 @@ class ElementsData:
         if not os.path.isfile(fin):
             self.index = self.index - 1
         with open(fin, 'rb') as file: # Read binary
-            databytes = os.path.getsize(self.DataFileName)
+            databytes = os.path.getsize(fin)
             print("Datasize in bytes =",databytes)
             columns = self.Channels + 1
             self.Rows = int(databytes // 4 // columns)
-            print("Channels =", self.Channels)
-            print("Rows =", self.Rows)
 
             # Use struct to unpack binary data into Data array
             formatstring = str(columns * 'f')
